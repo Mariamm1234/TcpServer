@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClientHandler extends Thread {
     final DataInputStream ournewDataInputstream;
@@ -15,7 +17,8 @@ public class ClientHandler extends Thread {
     static int refusedFiles = 0;
     String path = "";
     long res = this.Time;
-
+    int fileNumber = 0;
+    Map<String, Long> fileTime = new HashMap<String, Long>();
     public ClientHandler(Socket mynewSocket, DataInputStream ournewDataInputstream, DataOutputStream ournewDataOutputstream, long time, String path) {
         this.ournewDataInputstream = ournewDataInputstream;
         this.ournewDataOutputstream = ournewDataOutputstream;
@@ -31,6 +34,9 @@ public class ClientHandler extends Thread {
 //                String createFilePath=ournewDataInputstream.readUTF();
                 recieveFile(path, mynewSocket, ournewDataInputstream, ournewDataOutputstream);
                 compareFiles(path, mynewSocket);
+                long startTime = System.currentTimeMillis();
+                fileTime.put(String.format("file number %s", fileNumber + 1),System.currentTimeMillis() - startTime);
+                fileNumber++;
 
             } catch (Exception e) {
                 e.printStackTrace();

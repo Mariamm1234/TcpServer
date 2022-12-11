@@ -54,22 +54,48 @@ public class ClientHandler extends Thread {
     }
 
     public void recieveFile(String path, Socket socket, DataInputStream ournewDataInputstream, DataOutputStream ournewDataOutputstream) throws Exception {
-        byte[] contents = new byte[10000];
-        //Initialize the FileOutputStream to the output file's full path.
-//        if(ournewDataInputstream.readUTF().equals("Start"))
-//        {
-        FileOutputStream fos = new FileOutputStream(path);
-        BufferedOutputStream bos = new BufferedOutputStream(fos);
-        InputStream is = socket.getInputStream();
-        //No of bytes read in one read() call
-        int bytesRead = 0;
-        while ((bytesRead = is.read(contents)) != -1&&!ournewDataInputstream.readUTF().equals("Exit")) {
-            bos.write(contents, 0, bytesRead);
-        }
-        bos.flush();
-    }
+//        byte[] contents = new byte[10000];
+//        //Initialize the FileOutputStream to the output file's full path.
+////        if(ournewDataInputstream.readUTF().equals("Start"))
+////        {
+//        FileOutputStream fos = new FileOutputStream(path);
+//        BufferedOutputStream bos = new BufferedOutputStream(fos);
+//        InputStream is = socket.getInputStream();
+//        //No of bytes read in one read() call
+//        int bytesRead = 0;
+//        while ((bytesRead = is.read(contents)) != -1&&!ournewDataInputstream.readUTF().equals("Exit")) {
+//            bos.write(contents, 0, bytesRead);
+//        }
+//        bos.flush();
+//    }
+        FileOutputStream fos=null;
+        BufferedOutputStream bos=null;
+        try {
+            // receive file
+            byte [] mybytearray  = new byte [6022386];
+            InputStream is = socket.getInputStream();
+            fos = new FileOutputStream(path);
+           bos = new BufferedOutputStream(fos);
+           int bytesRead = is.read(mybytearray,0,mybytearray.length);
+        int  current = bytesRead;
 
-//}
+            do {
+                bytesRead =
+                        is.read(mybytearray, current, (mybytearray.length-current));
+                if(bytesRead >= 0) current += bytesRead;
+            } while(bytesRead > -1);
+
+            bos.write(mybytearray, 0 , current);
+            bos.flush();
+//            System.out.println("File " + filename
+//                    + " downloaded (" + current + " bytes read)");
+        }
+        finally {
+            if (fos != null) fos.close();
+            if (bos != null) bos.close();
+            if (socket != null) socket.close();
+        }
+    }
   public  void compareFiles(String path, Socket client) throws IOException {
         File serverfile = new File("tcpServer1.txt");
         File exist = new File(path);

@@ -1,10 +1,14 @@
 package com.company;
 
 import java.io.*;
+import java.io.File;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ClientHandler extends Thread {
@@ -13,13 +17,12 @@ public class ClientHandler extends Thread {
     final Socket mynewSocket;
     static Calendar now = Calendar.getInstance();
     long Time = 0;
-    static int acceptedFiles = 0;
-    static int refusedFiles = 0;
+    static int acceptedFilesWthServer = 0;
+    static int refusedFilesWthServer = 0;
     String path = "";
-    long res = this.Time;
     int fileNumber = 0;
     Map<String, Long> fileTime = new HashMap<String, Long>();
-    public ClientHandler(Socket mynewSocket, DataInputStream ournewDataInputstream, DataOutputStream ournewDataOutputstream, long time, String path) {
+    public ClientHandler(Socket mynewSocket, DataInputStream ournewDataInputstream, DataOutputStream ournewDataOutputstream, long time, String path) throws IOException {
         this.ournewDataInputstream = ournewDataInputstream;
         this.ournewDataOutputstream = ournewDataOutputstream;
         this.mynewSocket = mynewSocket;
@@ -34,12 +37,13 @@ public class ClientHandler extends Thread {
 //                String createFilePath=ournewDataInputstream.readUTF();
                 recieveFile(path, mynewSocket, ournewDataInputstream, ournewDataOutputstream);
                 compareFiles(path, mynewSocket);
+                printTimeDetails(fileNumber);
                 long startTime = System.currentTimeMillis();
                 fileTime.put(String.format("file number %s", fileNumber + 1),System.currentTimeMillis() - startTime);
                 fileNumber++;
 
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
 //            try {
 //                // closing resources
@@ -53,7 +57,7 @@ public class ClientHandler extends Thread {
 
     }
 
-    public void recieveFile(String path, Socket socket, DataInputStream ournewDataInputstream, DataOutputStream ournewDataOutputstream) throws Exception {
+    public void recieveFile(String path, Socket socket, DataInputStream ournewDataInputstream, DataOutputStream ournewDataOutputstream) throws IOException {
 //        byte[] contents = new byte[10000];
 //        //Initialize the FileOutputStream to the output file's full path.
 ////        if(ournewDataInputstream.readUTF().equals("Start"))
@@ -72,45 +76,76 @@ public class ClientHandler extends Thread {
         BufferedOutputStream bos=null;
         try {
             // receive file
-            byte [] mybytearray  = new byte [6022386];
+            byte[] mybytearray = new byte[6022386];
             InputStream is = socket.getInputStream();
             fos = new FileOutputStream(path);
-           bos = new BufferedOutputStream(fos);
-           int bytesRead = is.read(mybytearray,0,mybytearray.length);
-        int  current = bytesRead;
+            bos = new BufferedOutputStream(fos);
+            int bytesRead = is.read(mybytearray, 0, mybytearray.length);
+            int current = bytesRead;
 
             do {
                 bytesRead =
-                        is.read(mybytearray, current, (mybytearray.length-current));
-                if(bytesRead >= 0) current += bytesRead;
-            } while(bytesRead > -1);
-
-            bos.write(mybytearray, 0 , current);
+                        is.read(mybytearray, current, (mybytearray.length - current));
+                if (bytesRead >= 0) current += bytesRead;
+            } while (bytesRead > -1);
+//printTimeDetails();
+            bos.write(mybytearray, 0, current);
             bos.flush();
+        fileNumber++;
 //            System.out.println("File " + filename
 //                    + " downloaded (" + current + " bytes read)");
+        } finally {
+
         }
-        finally {
-            if (fos != null) fos.close();
-            if (bos != null) bos.close();
-            if (socket != null) socket.close();
-        }
+//        finally {
+//            if (fos != null) fos.close();
+//            if (bos != null) bos.close();
+//            if (socket != null) socket.close();
+//        }
     }
   public  void compareFiles(String path, Socket client) throws IOException {
-        File serverfile = new File("tcpServer1.txt");
-        File exist = new File(path);
-        System.out.print(Files.mismatch(serverfile.toPath(), exist.toPath()));
-        long res = Files.mismatch(serverfile.toPath(), exist.toPath());
-        if (res == -1)
-            acceptedFiles++;
-         else
-            refusedFiles++;
+        //ارجع كل الفايلات الي عندي
+    /*  List<Path>s=Files.list(Paths.get("")).toList();
+      for (Path e:s) {
+          System.out.println(e);
+      }*/
+      List<Path>s=Files.list(Paths.get("")).toList();
+      File serverfile =null;
+      File exist = new File(path);
+      for (Path e:s) {
+          serverfile=new File(e.toString());
+          if(serverfile.compareTo(exist)==0)
+          {
+              if(Files.mismatch(serverfile.toPath(),exist.toPath())==-1)
+              {
+               System.out.println(Files.mismatch(e, exist.toPath()));
+                  acceptedFilesWthServer++;}
+          }
+          else
+              refusedFilesWthServer++;
+//          if(Files.mismatch(serverfile.toPath(), exist.toPath())==-1)
+//          {  System.out.println(Files.mismatch(e, exist.toPath()));
+//         acceptedFilesWthServer++;
+//          break;
+//          }
+//          else
+//          { refusedFilesWthServer++;}
+
+      }
+//      File serverfile =new File("tcpServer1.txt");
+//      File exist = new File(path);
+//        System.out.println(Files.mismatch(serverfile.toPath(), exist.toPath()));
+//        long res = Files.mismatch(serverfile.toPath(), exist.toPath());
+//        if (res == -1)
+//            acceptedFilesWthServer++;
+//         else
+//            refusedFilesWthServer++;
     }
   public  void printTimeDetails(int num) {
         long tim = System.currentTimeMillis() - this.Time;
-        System.out.print("total time for " + num + " is = " + tim);
-        System.out.print("average time for " + num + " is = " + tim / num);
-        System.out.print("number of refused files is = " + refusedFiles);
-        System.out.print("number of accepted files is = " + acceptedFiles);
+        System.out.println("total time for " + num + " is = " + tim);
+        System.out.println("average time for " + num + " is = " + tim / num);
+        System.out.println("number of refused files is = " + refusedFilesWthServer);
+        System.out.println("number of accepted files is = " + acceptedFilesWthServer);
     }
 }

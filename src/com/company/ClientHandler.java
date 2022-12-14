@@ -35,12 +35,13 @@ public class ClientHandler extends Thread {
         while (true) {
             try {
 //                String createFilePath=ournewDataInputstream.readUTF();
-                recieveFile(path, mynewSocket, ournewDataInputstream, ournewDataOutputstream);
+                long startTime = System.currentTimeMillis();
+                recieveFile(path, mynewSocket, ournewDataInputstream, ournewDataOutputstream,startTime);
                 compareFiles(path, mynewSocket);
                 printTimeDetails(fileNumber);
-                long startTime = System.currentTimeMillis();
-                fileTime.put(String.format("file number %s", fileNumber + 1),System.currentTimeMillis() - startTime);
-                fileNumber++;
+
+//                fileTime.put(String.format("file number %s", fileNumber + 1),System.currentTimeMillis() - startTime);
+//                fileNumber++;
 
             } catch (Exception e) {
 //                e.printStackTrace();
@@ -57,7 +58,7 @@ public class ClientHandler extends Thread {
 
     }
 
-    public void recieveFile(String path, Socket socket, DataInputStream ournewDataInputstream, DataOutputStream ournewDataOutputstream) throws IOException {
+    public void recieveFile(String path, Socket socket, DataInputStream ournewDataInputstream, DataOutputStream ournewDataOutputstream,long startTime) throws IOException {
 //        byte[] contents = new byte[10000];
 //        //Initialize the FileOutputStream to the output file's full path.
 ////        if(ournewDataInputstream.readUTF().equals("Start"))
@@ -91,11 +92,9 @@ public class ClientHandler extends Thread {
 //printTimeDetails();
             bos.write(mybytearray, 0, current);
             bos.flush();
-        fileNumber++;
-//            System.out.println("File " + filename
-//                    + " downloaded (" + current + " bytes read)");
         } finally {
-
+            fileTime.put(String.format("file number %s", fileNumber + 1),System.currentTimeMillis() - startTime);
+            fileNumber++;
         }
 //        finally {
 //            if (fos != null) fos.close();
@@ -110,7 +109,7 @@ public class ClientHandler extends Thread {
           System.out.println(e);
       }*/
       List<Path>s=Files.list(Paths.get("")).toList();
-      File serverfile =null;
+      File serverfile;
       File exist = new File(path);
       for (Path e:s) {
           serverfile=new File(e.toString());
@@ -147,5 +146,10 @@ public class ClientHandler extends Thread {
         System.out.println("average time for " + num + " is = " + tim / num);
         System.out.println("number of refused files is = " + refusedFilesWthServer);
         System.out.println("number of accepted files is = " + acceptedFilesWthServer);
+      for (Map.Entry<String, Long> me :
+              fileTime.entrySet()) {
+          System.out.print(me.getKey() + ":");
+          System.out.println(me.getValue());
+      }
     }
 }

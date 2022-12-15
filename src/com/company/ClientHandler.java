@@ -34,45 +34,16 @@ public class ClientHandler extends Thread {
     public void run() {
         while (true) {
             try {
-//                String createFilePath=ournewDataInputstream.readUTF();
                 long startTime = System.currentTimeMillis();
                 recieveFile(path, mynewSocket, ournewDataInputstream, ournewDataOutputstream,startTime);
                 compareFiles(path, mynewSocket);
                 printTimeDetails(fileNumber);
-
-//                fileTime.put(String.format("file number %s", fileNumber + 1),System.currentTimeMillis() - startTime);
-//                fileNumber++;
-
             } catch (Exception e) {
-//                e.printStackTrace();
             }
-//            try {
-//                // closing resources
-//                this.ournewDataInputstream.close();
-//                this.ournewDataOutputstream.close();
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
         }
 
     }
-
     public void recieveFile(String path, Socket socket, DataInputStream ournewDataInputstream, DataOutputStream ournewDataOutputstream,long startTime) throws IOException {
-//        byte[] contents = new byte[10000];
-//        //Initialize the FileOutputStream to the output file's full path.
-////        if(ournewDataInputstream.readUTF().equals("Start"))
-////        {
-//        FileOutputStream fos = new FileOutputStream(path);
-//        BufferedOutputStream bos = new BufferedOutputStream(fos);
-//        InputStream is = socket.getInputStream();
-//        //No of bytes read in one read() call
-//        int bytesRead = 0;
-//        while ((bytesRead = is.read(contents)) != -1&&!ournewDataInputstream.readUTF().equals("Exit")) {
-//            bos.write(contents, 0, bytesRead);
-//        }
-//        bos.flush();
-//    }
         FileOutputStream fos=null;
         BufferedOutputStream bos=null;
         try {
@@ -96,18 +67,8 @@ public class ClientHandler extends Thread {
             fileTime.put(String.format("file number %s", fileNumber + 1),System.currentTimeMillis() - startTime);
             fileNumber++;
         }
-//        finally {
-//            if (fos != null) fos.close();
-//            if (bos != null) bos.close();
-//            if (socket != null) socket.close();
-//        }
     }
   public  void compareFiles(String path, Socket client) throws IOException {
-        //ارجع كل الفايلات الي عندي
-    /*  List<Path>s=Files.list(Paths.get("")).toList();
-      for (Path e:s) {
-          System.out.println(e);
-      }*/
       List<Path>s=Files.list(Paths.get("")).toList();
       File serverfile;
       File exist = new File(path);
@@ -117,28 +78,14 @@ public class ClientHandler extends Thread {
           {
               if(Files.mismatch(serverfile.toPath(),exist.toPath())==-1)
               {
+                  System.out.println("read successfully");
                System.out.println(Files.mismatch(e, exist.toPath()));
                   acceptedFilesWthServer++;}
           }
           else
-              refusedFilesWthServer++;
-//          if(Files.mismatch(serverfile.toPath(), exist.toPath())==-1)
-//          {  System.out.println(Files.mismatch(e, exist.toPath()));
-//         acceptedFilesWthServer++;
-//          break;
-//          }
-//          else
-//          { refusedFilesWthServer++;}
+          {refusedFilesWthServer++;}
 
       }
-//      File serverfile =new File("tcpServer1.txt");
-//      File exist = new File(path);
-//        System.out.println(Files.mismatch(serverfile.toPath(), exist.toPath()));
-//        long res = Files.mismatch(serverfile.toPath(), exist.toPath());
-//        if (res == -1)
-//            acceptedFilesWthServer++;
-//         else
-//            refusedFilesWthServer++;
     }
   public  void printTimeDetails(int num) {
         long tim = System.currentTimeMillis() - this.Time;
